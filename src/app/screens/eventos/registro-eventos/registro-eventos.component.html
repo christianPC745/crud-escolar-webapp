@@ -1,0 +1,178 @@
+<div class="wrapper">
+  <div class="section-registro">
+    <div class="body-registro">
+      <div class="row mt-3 mb-3">
+        <div class="form-group col-12">
+          <label class="title-user" for="registro-evento">
+            {{ editar ? 'Actualiza los datos del evento' : 'Ingresa los datos del evento' }}
+          </label>
+        </div>
+      </div>
+
+      <!-- Nombre del evento -->
+      <mat-form-field class="mat-input" appearance="outline">
+        <mat-label>Nombre del evento</mat-label>
+        <input matInput [(ngModel)]="evento.nombre" name="nombre" placeholder="Escribe el nombre del evento" />
+      </mat-form-field>
+      <div *ngIf="errors.nombre" class="invalid-feedback">{{ errors.nombre }}</div>
+
+      <!-- Tipo de evento -->
+      <mat-form-field class="mat-input" appearance="outline">
+        <mat-label>Tipo de evento</mat-label>
+        <mat-select [(ngModel)]="evento.tipo" name="tipo" placeholder="Selecciona tipo">
+          <mat-option *ngFor="let t of tipos" [value]="t">{{ t }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div *ngIf="errors.tipo" class="invalid-feedback">{{ errors.tipo }}</div>
+
+      <!-- Fecha y horario -->
+      <div class="fecha-horario row">
+        <div class="col-4">
+          <mat-form-field class="mat-input" appearance="outline">
+            <mat-label>Fecha de realización</mat-label>
+            <input matInput [matDatepicker]="pickerRealizacion" placeholder="dd/MM/yyyy"
+              [value]="evento.fecha ? (evento.fecha | date:'dd/MM/yyyy') : ''" (dateChange)="changeFecha($event)"
+              name="fechaRealizacion" [min]="minDate" required />
+            <mat-datepicker-toggle matSuffix [for]="pickerRealizacion"></mat-datepicker-toggle>
+            <mat-datepicker #pickerRealizacion startView="month"></mat-datepicker>
+          </mat-form-field>
+
+          <div *ngIf="errors.fechaRealizacion" class="invalid-feedback">
+            {{ errors.fechaRealizacion }}
+          </div>
+        </div>
+        <div class="fecha-horario row">
+          <div class="fecha-horario row">
+            <!-- Hora inicio -->
+            <div class="col-4">
+              <mat-form-field class="mat-input" appearance="outline">
+                <mat-label>Hora inicio</mat-label>
+                <input matInput [ngxTimepicker]="pickerInicio" readonly [(ngModel)]="evento.horarioInicio"
+                  name="horarioInicio" placeholder="Selecciona hora inicio" />
+                <mat-icon matSuffix (click)="pickerInicio.open()">access_time</mat-icon>
+              </mat-form-field>
+
+              <ngx-material-timepicker #pickerInicio [format]="24"
+                (timeSet)="onInicioChange($event)"></ngx-material-timepicker>
+
+              <div *ngIf="errors.horarioInicio" class="invalid-feedback">
+                {{ errors.horarioInicio }}
+              </div>
+            </div>
+
+            <!-- Hora fin -->
+            <div class="col-4">
+              <mat-form-field class="mat-input" appearance="outline">
+                <mat-label>Hora fin</mat-label>
+                <input matInput [ngxTimepicker]="pickerFin" readonly [(ngModel)]="evento.horarioFin" name="horarioFin"
+                  placeholder="Selecciona hora fin" />
+                <mat-icon matSuffix (click)="pickerFin.open()">access_time</mat-icon>
+              </mat-form-field>
+
+              <ngx-material-timepicker #pickerFin [format]="24" [min]="evento.horarioInicio"></ngx-material-timepicker>
+
+              <div *ngIf="errors.horarioFin" class="invalid-feedback">
+                {{ errors.horarioFin }}
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- Lugar -->
+          <mat-form-field class="mat-input" appearance="outline">
+            <mat-label>Lugar</mat-label>
+            <input matInput [(ngModel)]="evento.lugar" name="lugar" placeholder="Escribe el lugar" />
+          </mat-form-field>
+          <div *ngIf="errors.lugar" class="invalid-feedback">{{ errors.lugar }}</div>
+
+          <!-- 7. Público objetivo (estático) -->
+          <div class="form-group">
+            <label class="title-user">Público objetivo</label>
+          </div>
+          <div class="checkbox-group mat-input">
+            <mat-checkbox [checked]="evento.publicoObjetivo.includes('ESTUDIANTES')"
+              (change)="togglePublico('ESTUDIANTES', $event.checked)">
+              Estudiantes
+            </mat-checkbox>
+            <mat-checkbox [checked]="evento.publicoObjetivo.includes('PROFESORES')"
+              (change)="togglePublico('PROFESORES', $event.checked)">
+              Profesores
+            </mat-checkbox>
+            <mat-checkbox [checked]="evento.publicoObjetivo.includes('PUBLICO_GENERAL')"
+              (change)="togglePublico('PUBLICO_GENERAL', $event.checked)">
+              Público general
+            </mat-checkbox>
+          </div>
+          <div *ngIf="errors.publicoObjetivo" class="invalid-feedback">
+            {{ errors.publicoObjetivo }}
+          </div>
+
+          <!-- Programa educativo (estático) -->
+          <mat-form-field class="mat-input" appearance="outline" *ngIf="evento.publicoObjetivo.includes('ESTUDIANTES')">
+            <mat-label>Programa educativo</mat-label>
+            <mat-select [(ngModel)]="evento.programaEducativo" name="programaEducativo"
+              placeholder="Selecciona programa educativo">
+              <mat-option value="Ingeniería en Ciencias de la Computación">
+                Ingeniería en Ciencias de la Computación
+              </mat-option>
+              <mat-option value="Licenciatura en Ciencias de la Computación">
+                Licenciatura en Ciencias de la Computación
+              </mat-option>
+              <mat-option value="Ingeniería en Tecnologías de la Información">
+                Ingeniería en Tecnologías de la Información
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div *ngIf="errors.programaEducativo" class="invalid-feedback">
+            {{ errors.programaEducativo }}
+          </div>
+
+          <!-- Responsable -->
+          <mat-form-field class="mat-input" appearance="outline">
+            <mat-label>Responsable</mat-label>
+            <mat-select [(ngModel)]="evento.responsable" name="responsable" placeholder="Selecciona responsable">
+              <mat-option *ngFor="let r of responsables" [value]="r.id">
+                {{ r }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div *ngIf="errors.responsable" class="invalid-feedback">
+            {{ errors.responsable }}
+          </div>
+
+          <!-- Descripción -->
+          <mat-form-field class="mat-input" appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <textarea matInput rows="4" [(ngModel)]="evento.descripcion" name="descripcion"
+              placeholder="Describe el evento"></textarea>
+            <mat-hint align="end">
+              {{ evento.descripcion?.length || 0 }}/500
+            </mat-hint>
+          </mat-form-field>
+          <div *ngIf="errors.descripcion" class="invalid-feedback">
+            {{ errors.descripcion }}
+          </div>
+
+          <!-- Cupo -->
+          <mat-form-field class="mat-input" appearance="outline">
+            <mat-label>Cupo</mat-label>
+            <input matInput type="number" [(ngModel)]="evento.cupo" name="cupo" placeholder="Escribe cupo" />
+          </mat-form-field>
+          <div *ngIf="errors.cupo" class="invalid-feedback">{{ errors.cupo }}</div>
+
+          <!-- Botones -->
+          <div class="section-buttons">
+            <button class="btn btn-danger" (click)="regresar()">
+              Cancelar
+            </button>
+            <button *ngIf="!editar" class="btn btn-primary" type="button" (click)="registrar()">
+              Registrar
+            </button>
+            <button *ngIf="editar" class="btn btn-primary" type="button" (click)="actualizar()">
+              Actualizar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
